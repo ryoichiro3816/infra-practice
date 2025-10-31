@@ -18,11 +18,14 @@ func main() {
 	godotenv.Load()
 
 	// Init DB
-	
-	db, err := models.InitDB(getEnv("DB_PATH", "./storage/database.db"))
+	dbPath := getEnv("DB_PATH")
+	if dbPath == "none"{
+		log.Fatalf("DB error (path: %s): %v", dbPath)
+	}
+
+	db, err := models.InitDB(dbPath)
 	if err != nil {
-		log.Fatal(getEnv("DB_PATH", "./storage/database.db"))
-		log.Fatal("DB error:", err)
+		log.Fatalf("DB error (path: %s): %v", dbPath, err)
 	}
 
 	// Init handlers
@@ -44,14 +47,18 @@ func main() {
 	api.HandleFunc("/media/{id}", mediaHandler.GetMedia).Methods("GET")
 	api.HandleFunc("/media/{id}/file", mediaHandler.GetMediaFile).Methods("GET")
 
-	port := getEnv("PORT", "8080")
+	port := getEnv("PORT")
+	if port == "none"{
+		log.Fatalf("port error (path: %s): %v", port)
+	}
 	log.Printf("Starting server on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+func getEnv(key string) string {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return "none"
 	}
-	return defaultValue
+	return value
 }
