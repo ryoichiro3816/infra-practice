@@ -18,8 +18,10 @@ func main() {
 	godotenv.Load()
 
 	// Init DB
+	
 	db, err := models.InitDB(getEnv("DB_PATH", "./storage/database.db"))
 	if err != nil {
+		log.Fatal(getEnv("DB_PATH", "./storage/database.db"))
 		log.Fatal("DB error:", err)
 	}
 
